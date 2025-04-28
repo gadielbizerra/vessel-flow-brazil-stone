@@ -5,13 +5,28 @@ import VesselForm from '@/components/VesselForm';
 import Layout from '@/components/Layout';
 import { VesselFormData } from '@/types/vessel';
 import { addVessel } from '@/services/vesselService';
+import { useToast } from '@/hooks/use-toast';
 
 const AddVessel: React.FC = () => {
   const navigate = useNavigate();
+  const { toast } = useToast();
   
-  const handleAddVessel = (data: VesselFormData) => {
-    addVessel(data);
-    navigate('/');
+  const handleAddVessel = async (data: VesselFormData) => {
+    const newVessel = await addVessel(data);
+    
+    if (newVessel) {
+      toast({
+        title: "Navio adicionado",
+        description: "O navio foi adicionado com sucesso.",
+      });
+      navigate('/');
+    } else {
+      toast({
+        title: "Erro",
+        description: "Não foi possível adicionar o navio.",
+        variant: "destructive",
+      });
+    }
   };
   
   return (

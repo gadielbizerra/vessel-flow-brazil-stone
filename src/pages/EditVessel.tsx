@@ -16,35 +16,51 @@ const EditVessel: React.FC = () => {
   
   useEffect(() => {
     if (id) {
-      const vessel = getVesselById(id);
-      
-      if (vessel) {
-        setInitialValues({
-          name: vessel.name,
-          loadingPortName: vessel.loadingPort.name,
-          loadingPortEta: vessel.loadingPort.eta,
-          loadingPortEtd: vessel.loadingPort.etd,
-          dischargePortName: vessel.dischargePort.name,
-          dischargePortEta: vessel.dischargePort.eta,
-          dischargePortEtd: vessel.dischargePort.etd,
-        });
-      } else {
-        toast({
-          title: "Erro",
-          description: "Navio não encontrado",
-          variant: "destructive",
-        });
-        navigate('/');
-      }
+      loadVessel(id);
+    }
+  }, [id]);
+  
+  const loadVessel = async (vesselId: string) => {
+    const vessel = await getVesselById(vesselId);
+    
+    if (vessel) {
+      setInitialValues({
+        name: vessel.name,
+        loadingPortName: vessel.loading_port.name,
+        loadingPortEta: vessel.loading_port.eta,
+        loadingPortEtd: vessel.loading_port.etd,
+        dischargePortName: vessel.discharge_port.name,
+        dischargePortEta: vessel.discharge_port.eta,
+        dischargePortEtd: vessel.discharge_port.etd,
+      });
+    } else {
+      toast({
+        title: "Erro",
+        description: "Navio não encontrado",
+        variant: "destructive",
+      });
+      navigate('/');
     }
     
     setLoading(false);
-  }, [id, navigate, toast]);
+  };
   
-  const handleUpdateVessel = (data: VesselFormData) => {
+  const handleUpdateVessel = async (data: VesselFormData) => {
     if (id) {
-      updateVessel(id, data);
-      navigate('/');
+      const updated = await updateVessel(id, data);
+      if (updated) {
+        toast({
+          title: "Navio atualizado",
+          description: "O navio foi atualizado com sucesso.",
+        });
+        navigate('/');
+      } else {
+        toast({
+          title: "Erro",
+          description: "Não foi possível atualizar o navio.",
+          variant: "destructive",
+        });
+      }
     }
   };
   

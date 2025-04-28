@@ -1,105 +1,111 @@
 
 import { Vessel, VesselFormData } from '@/types/vessel';
-
-// This is a simple in-memory storage for vessels
-// In a real app, you'd use localStorage, Firebase, Supabase, etc.
-const STORAGE_KEY = 'vesselview_vessels';
-
-// Load vessels from localStorage
-const loadVessels = (): Vessel[] => {
-  try {
-    const storedVessels = localStorage.getItem(STORAGE_KEY);
-    return storedVessels ? JSON.parse(storedVessels) : [];
-  } catch (error) {
-    console.error('Failed to load vessels from storage', error);
-    return [];
-  }
-};
-
-// Save vessels to localStorage
-const saveVessels = (vessels: Vessel[]): void => {
-  try {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(vessels));
-  } catch (error) {
-    console.error('Failed to save vessels to storage', error);
-  }
-};
+import { supabase } from '@/integrations/supabase/client';
+import { useToast } from '@/hooks/use-toast';
 
 // Get all vessels
-export const getAllVessels = (): Vessel[] => {
-  return loadVessels();
+export const getAllVessels = async (): Promise<Vessel[]> => {
+  const { data, error } = await supabase
+    .from('vessels')
+    .select('*')
+    .order('created_at', { ascending: true });
+
+  if (error) {
+    console.error('Error fetching vessels:', error);
+    return [];
+  }
+
+  return data || [];
 };
 
 // Add a new vessel
-export const addVessel = (vesselData: VesselFormData): Vessel => {
-  const vessels = loadVessels();
-  
-  const newVessel: Vessel = {
-    id: crypto.randomUUID(),
+export const addVessel = async (vesselData: VesselFormData): Promise<Vessel | null> => {
+  const newVessel = {
     name: vesselData.name,
-    loadingPort: {
+    loading_port: {
       name: vesselData.loadingPortName,
       eta: vesselData.loadingPortEta,
       etd: vesselData.loadingPortEtd,
     },
-    dischargePort: {
+    discharge_port: {
       name: vesselData.dischargePortName,
       eta: vesselData.dischargePortEta,
       etd: vesselData.dischargePortEtd,
     },
-    createdAt: new Date().toISOString(),
-    updatedAt: new Date().toISOString(),
   };
-  
-  vessels.push(newVessel);
-  saveVessels(vessels);
-  
-  return newVessel;
+
+  const { data, error } = await supabase
+    .from('vessels')
+    .insert([newVessel])
+    .select()
+    .single();
+
+  if (error) {
+    console.error('Error adding vessel:', error);
+    return null;
+  }
+
+  return data;
 };
 
 // Update a vessel
-export const updateVessel = (id: string, vesselData: VesselFormData): Vessel | null => {
-  const vessels = loadVessels();
-  const index = vessels.findIndex(v => v.id === id);
-  
-  if (index === -1) return null;
-  
-  const updatedVessel: Vessel = {
-    ...vessels[index],
+export const updateVessel = async (id: string, vesselData: VesselFormData): Promise<Vessel | null> => {
+  const updatedVessel = {
     name: vesselData.name,
-    loadingPort: {
+    loading_port: {
       name: vesselData.loadingPortName,
       eta: vesselData.loadingPortEta,
       etd: vesselData.loadingPortEtd,
     },
-    dischargePort: {
+    discharge_port: {
       name: vesselData.dischargePortName,
       eta: vesselData.dischargePortEta,
       etd: vesselData.dischargePortEtd,
     },
-    updatedAt: new Date().toISOString(),
   };
-  
-  vessels[index] = updatedVessel;
-  saveVessels(vessels);
-  
-  return updatedVessel;
+
+  const { data, error } = await supabase
+    .from('vessels')
+    .update(updatedVessel)
+    .eq('id', id)
+    .select()
+    .single();
+
+  if (error) {
+    console.error('Error updating vessel:', error);
+    return null;
+  }
+
+  return data;
 };
 
 // Delete a vessel
-export const deleteVessel = (id: string): boolean => {
-  const vessels = loadVessels();
-  const filteredVessels = vessels.filter(v => v.id !== id);
-  
-  if (filteredVessels.length === vessels.length) return false;
-  
-  saveVessels(filteredVessels);
+export const deleteVessel = async (id: string): Promise<boolean> => {
+  const { error } = await supabase
+    .from('vessels')
+    .delete()
+    .eq('id', id);
+
+  if (error) {
+    console.error('Error deleting vessel:', error);
+    return false;
+  }
+
   return true;
 };
 
 // Get a specific vessel by ID
-export const getVesselById = (id: string): Vessel | null => {
-  const vessels = loadVessels();
-  const vessel = vessels.find(v => v.id === id);
-  return vessel || null;
+export const getVesselById = async (id: string): Promise<Vessel | null> => {
+  const { data, error } = await supabase
+    .from('vessels')
+    .select()
+    .eq('id', id)
+    .single();
+
+  if (error) {
+    console.error('Error fetching vessel:', error);
+    return null;
+  }
+
+  return data;
 };
