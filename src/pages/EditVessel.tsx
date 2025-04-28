@@ -26,12 +26,12 @@ const EditVessel: React.FC = () => {
     if (vessel) {
       setInitialValues({
         name: vessel.name,
-        loadingPortName: vessel.loading_port.name,
-        loadingPortEta: vessel.loading_port.eta,
-        loadingPortEtd: vessel.loading_port.etd,
-        dischargePortName: vessel.discharge_port.name,
-        dischargePortEta: vessel.discharge_port.eta,
-        dischargePortEtd: vessel.discharge_port.etd,
+        loadingPortName: vessel.loadingPort.name,
+        loadingPortEta: vessel.loadingPort.eta,
+        loadingPortEtd: vessel.loadingPort.etd,
+        dischargePortName: vessel.dischargePort.name,
+        dischargePortEta: vessel.dischargePort.eta,
+        dischargePortEtd: vessel.dischargePort.etd,
       });
     } else {
       toast({

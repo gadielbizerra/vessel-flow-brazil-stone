@@ -6,12 +6,26 @@ import { Vessel } from '@/types/vessel';
 
 const EmbedView: React.FC = () => {
   const [vessels, setVessels] = useState<Vessel[]>([]);
+  const [loading, setLoading] = useState(true);
   
   useEffect(() => {
-    // Load vessels from local storage
-    const data = getAllVessels();
-    setVessels(data);
+    const loadVessels = async () => {
+      setLoading(true);
+      const data = await getAllVessels();
+      setVessels(data);
+      setLoading(false);
+    };
+    
+    loadVessels();
   }, []);
+  
+  if (loading) {
+    return (
+      <div className="p-4 h-screen bg-gray-50 flex items-center justify-center">
+        <p>Carregando...</p>
+      </div>
+    );
+  }
   
   return (
     <div className="p-4 h-screen bg-gray-50">
