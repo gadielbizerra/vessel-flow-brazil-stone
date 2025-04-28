@@ -2,6 +2,24 @@
 import { Vessel, VesselFormData } from '@/types/vessel';
 import { supabase } from '@/integrations/supabase/client';
 
+// Helper type for the database response
+type VesselRow = {
+  id: string;
+  name: string;
+  loading_port: {
+    name: string;
+    eta: string;
+    etd: string;
+  };
+  discharge_port: {
+    name: string;
+    eta: string;
+    etd: string;
+  };
+  created_at: string;
+  updated_at: string;
+};
+
 // Get all vessels
 export const getAllVessels = async (): Promise<Vessel[]> => {
   const { data, error } = await supabase
@@ -15,22 +33,25 @@ export const getAllVessels = async (): Promise<Vessel[]> => {
   }
 
   // Map the database structure to our frontend types
-  return data?.map(item => ({
-    id: item.id,
-    name: item.name,
-    loadingPort: {
-      name: item.loading_port.name,
-      eta: item.loading_port.eta,
-      etd: item.loading_port.etd,
-    },
-    dischargePort: {
-      name: item.discharge_port.name,
-      eta: item.discharge_port.eta,
-      etd: item.discharge_port.etd,
-    },
-    createdAt: item.created_at,
-    updatedAt: item.updated_at,
-  })) || [];
+  return data?.map(item => {
+    const row = item as unknown as VesselRow;
+    return {
+      id: row.id,
+      name: row.name,
+      loadingPort: {
+        name: row.loading_port.name,
+        eta: row.loading_port.eta,
+        etd: row.loading_port.etd,
+      },
+      dischargePort: {
+        name: row.discharge_port.name,
+        eta: row.discharge_port.eta,
+        etd: row.discharge_port.etd,
+      },
+      createdAt: row.created_at,
+      updatedAt: row.updated_at,
+    };
+  }) || [];
 };
 
 // Add a new vessel
@@ -61,21 +82,22 @@ export const addVessel = async (vesselData: VesselFormData): Promise<Vessel | nu
   }
 
   // Map the database response to our frontend type
+  const row = data as unknown as VesselRow;
   return {
-    id: data.id,
-    name: data.name,
+    id: row.id,
+    name: row.name,
     loadingPort: {
-      name: data.loading_port.name,
-      eta: data.loading_port.eta,
-      etd: data.loading_port.etd,
+      name: row.loading_port.name,
+      eta: row.loading_port.eta,
+      etd: row.loading_port.etd,
     },
     dischargePort: {
-      name: data.discharge_port.name,
-      eta: data.discharge_port.eta,
-      etd: data.discharge_port.etd,
+      name: row.discharge_port.name,
+      eta: row.discharge_port.eta,
+      etd: row.discharge_port.etd,
     },
-    createdAt: data.created_at,
-    updatedAt: data.updated_at,
+    createdAt: row.created_at,
+    updatedAt: row.updated_at,
   };
 };
 
@@ -108,21 +130,22 @@ export const updateVessel = async (id: string, vesselData: VesselFormData): Prom
   }
 
   // Map the database response to our frontend type
+  const row = data as unknown as VesselRow;
   return {
-    id: data.id,
-    name: data.name,
+    id: row.id,
+    name: row.name,
     loadingPort: {
-      name: data.loading_port.name,
-      eta: data.loading_port.eta,
-      etd: data.loading_port.etd,
+      name: row.loading_port.name,
+      eta: row.loading_port.eta,
+      etd: row.loading_port.etd,
     },
     dischargePort: {
-      name: data.discharge_port.name,
-      eta: data.discharge_port.eta,
-      etd: data.discharge_port.etd,
+      name: row.discharge_port.name,
+      eta: row.discharge_port.eta,
+      etd: row.discharge_port.etd,
     },
-    createdAt: data.created_at,
-    updatedAt: data.updated_at,
+    createdAt: row.created_at,
+    updatedAt: row.updated_at,
   };
 };
 
@@ -155,20 +178,21 @@ export const getVesselById = async (id: string): Promise<Vessel | null> => {
   }
 
   // Map the database response to our frontend type
+  const row = data as unknown as VesselRow;
   return {
-    id: data.id,
-    name: data.name,
+    id: row.id,
+    name: row.name,
     loadingPort: {
-      name: data.loading_port.name,
-      eta: data.loading_port.eta,
-      etd: data.loading_port.etd,
+      name: row.loading_port.name,
+      eta: row.loading_port.eta,
+      etd: row.loading_port.etd,
     },
     dischargePort: {
-      name: data.discharge_port.name,
-      eta: data.discharge_port.eta,
-      etd: data.discharge_port.etd,
+      name: row.discharge_port.name,
+      eta: row.discharge_port.eta,
+      etd: row.discharge_port.etd,
     },
-    createdAt: data.created_at,
-    updatedAt: data.updated_at,
+    createdAt: row.created_at,
+    updatedAt: row.updated_at,
   };
 };
